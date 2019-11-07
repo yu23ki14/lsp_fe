@@ -1,20 +1,9 @@
 <template lang="pug">
-  div
-    main_header
-    nuxt
-    memo_controller(v-if="this.$route.path != '/memos/new'")
+  nuxt
 </template>
 
 <script>
-import memo_controller from '~/components/memo_controller.vue'
-import main_header from '~/components/main_header.vue'
 
-export default {
-  components: {
-    memo_controller,
-    main_header
-  }
-}
 </script>
 
 <style>
@@ -37,32 +26,4 @@ html {
   margin: 0;
 }
 
-.button--green {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #3b8070;
-  color: #3b8070;
-  text-decoration: none;
-  padding: 10px 30px;
-}
-
-.button--green:hover {
-  color: #fff;
-  background-color: #3b8070;
-}
-
-.button--grey {
-  display: inline-block;
-  border-radius: 4px;
-  border: 1px solid #35495e;
-  color: #35495e;
-  text-decoration: none;
-  padding: 10px 30px;
-  margin-left: 15px;
-}
-
-.button--grey:hover {
-  color: #fff;
-  background-color: #35495e;
-}
 </style>
