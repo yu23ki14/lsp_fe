@@ -1,11 +1,24 @@
 <template lang="pug">
   .page-container.flex-container.flex-between
-    .controller#controller(@click="predict")
-      .controller-x-axis(v-for="n of 7", :style="{left: n*50 + 'px'}")
-      .controller-y-axis(v-for="n of 7", :style="{top: n*50 + 'px'}")
-      .controller-x
-      .controller-y
-
+    .controller-container
+      .controller#controller(@click="predict")
+        .controller-x-axis(v-for="n of 7", :style="{left: n*50 + 'px'}")
+        .controller-y-axis(v-for="n of 7", :style="{top: n*50 + 'px'}")
+        .controller-x
+        .controller-y
+        .controller-morphing-checkpoint-container
+          .controller-morphing-checkpoint(v-for="(checkpoint, index) in checkpoints", :style="{top: checkpoint.y + 'px', left: checkpoint.x + 'px'}")
+            |{{index + 1}}
+      .mode-changer
+        button(@click="mode='single'", :style="{background: [mode == 'single' ? 'coral' : '']}")
+          |single
+        button(@click="mode='morphing'", :style="{background: [mode == 'morphing' ? 'coral': '']}")
+          |morphing
+      .morphing-controller(v-show="mode=='morphing'")
+        button(@click="get_gif")
+          |generate gif
+        button(@click="checkpoints=[]")
+          |reset
     .image-container.flex-container
       .image-item.flex-container.flex-end(v-for="image in images")
         img(:src="image.image_path")
@@ -22,21 +35,43 @@
 export default {
   data() {
     return {
-      images: []
+      images: [],
+      mode: 'single',
+      checkpoints: [],
+      checkpoints_vector: []
     }
   },
   methods: {
     predict: function (event) {
-      var controller = document.getElementById( "controller" )
-      var clientRect = controller.getBoundingClientRect()
-      var cX = window.pageXOffset + clientRect.left;
-      var cY = window.pageYOffset + clientRect.top;
-      var clickX = event.pageX - cX
-      var clickY = event.pageY - cY
-      var x = Math.round(((clickX / 100) * 2 - 4) * 100) / 100
-      var y = Math.round(((clickY / -100) * 2 + 4) * 100) / 100
-      var vector = [x, y]
-      this.get_prediction(vector)
+      const controller = document.getElementById( "controller" )
+      const clientRect = controller.getBoundingClientRect()
+      const cX = window.pageXOffset + clientRect.left;
+      const cY = window.pageYOffset + clientRect.top;
+      const clickX = event.pageX - cX
+      const clickY = event.pageY - cY
+      const x = Math.round(((clickX / 100) * 2 - 4) * 100) / 100
+      const y = Math.round(((clickY / -100) * 2 + 4) * 100) / 100
+      const vector = [x, y]
+      
+      if (this.mode == 'single') {
+        this.get_prediction(vector)
+      } else if (this.mode == 'morphing') {
+        var point = [clickX - 10, clickY - 10]
+        this.drop_checkpoint(vector, point)
+      }
+        
+    },
+    
+    drop_checkpoint(vector, point) {
+      if (this.checkpoints.length < 5) {
+        this.checkpoints.push({
+          x: point[0],
+          y: point[1]
+        })
+        this.checkpoints_vector.push({
+          vector: vector
+        })
+      }
     },
     
     async get_prediction(vector) {
@@ -46,6 +81,15 @@ export default {
           return false
         });
       return this.show_generated_image(response, vector)
+    },
+    
+    async get_gif(){
+      const params = {checkpoints: this.checkpoints_vector}
+      const response = await this.$axios.$post('/api/gif', params)
+        .catch(err=>{
+          return false
+        });
+      return this.show_generated_image(response, params)
     },
     
     async set_weights() {
@@ -78,21 +122,59 @@ export default {
 .flex-end
   align-items: flex-end
 
+.mode-changer
+  margin-top: 50px
+  
+  button
+    background: rgba(#ff7f50, .4)
+    min-width: 100px
+
 .controller
   width: 400px
   height: 400px
   border: 1px solid gray
   position: relative
   cursor: pointer
+
+.controller-morphing-checkpoint-container
+  .controller-morphing-checkpoint
+    position: absolute
+    width: 20px
+    height: 20px
+    border-radius: 10px
+    font-size: 12px
+    display: flex
+    justify-content: center
+    align-items: center
+    &:nth-of-type(1)
+      background: #4ee2ce
+    &:nth-of-type(2)
+      background: #b0e24e
+    &:nth-of-type(3)
+      background: #ffda72
+    &:nth-of-type(4)
+      background: #6087f3
+    &:nth-of-type(5)
+      background: #ff8cfb
+
+.morphing-controller
+  margin-top: 15px
+  
+  button
+    background: rgba(#6495ed, .4)
+    min-width: 100px
+    &:hover
+      background: #6495ed
+    
   
 .controller-x-axis, .controller-y-axis
   position: absolute
-  background: lightgray
 
 .controller-x-axis
   top: 0
   width: 1px
   height: 400px
+  border-right: 1px dashed lightgray
 
 .controller-x
   &:before
@@ -122,6 +204,7 @@ export default {
   left: 0
   width: 400px
   height: 1px
+  border-bottom: 1px dashed lightgray
 
 .image-container
   width: 600px

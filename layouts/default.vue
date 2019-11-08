@@ -19,11 +19,27 @@ html {
   box-sizing: border-box;
 }
 
+body::-webkit-scrollbar {
+  display: none;
+}
+
 *,
 *:before,
 *:after {
   box-sizing: border-box;
   margin: 0;
+}
+
+button {
+  border: none;
+  background: white;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+button:focus {
+  outline-color: transparent;
 }
 
 </style>

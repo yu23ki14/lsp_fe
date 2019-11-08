@@ -45,7 +45,7 @@ export default {
   
   axios: {
     // proxyHeaders: false
-    baseURL: "https://31b682f8.ngrok.io",
+    baseURL: "https://062a1b24.ngrok.io",
     retry: { retries: 3 }
   },
   /*
