@@ -82,8 +82,8 @@ export default {
       const cY = window.pageYOffset + clientRect.top;
       const clickX = event.pageX - cX
       const clickY = event.pageY - cY
-      const x = Math.round(((clickX / 100) * 2 - 4) * 100) / 100
-      const y = Math.round(((clickY / -100) * 2 + 4) * 100) / 100
+      const x = Math.round(((clickX / 20) * 2 - 20) * 100) / 100
+      const y = Math.round(((clickY / -20) * 2 + 20) * 100) / 100
       const vector = [x, y]
       
       if (this.mode == 'single') {
